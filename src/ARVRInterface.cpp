@@ -515,6 +515,12 @@ void oculus_update_touch_controller(arvr_data_struct *p_arvr_data, int p_which) 
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 12, p_arvr_data->inputState.Touches & ovrTouch_LIndexPointing);
 
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 14, p_arvr_data->inputState.Buttons & ovrButton_LThumb);
+		
+		godot_real rumble = arvr_api->godot_arvr_get_controller_rumble(p_arvr_data->trackers[p_which]);
+		if (rumble != p_arvr_data->rumble[p_which]) {
+			ovr_SetControllerVibration(p_arvr_data->session, ovrControllerType_LTouch, 1.0, rumble);
+			p_arvr_data->rumble[p_which] = rumble;
+		}
 	} else {
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 1, p_arvr_data->inputState.Buttons & ovrButton_B);
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 3, p_arvr_data->inputState.Buttons & ovrButton_Home); // oculus button
@@ -529,6 +535,12 @@ void oculus_update_touch_controller(arvr_data_struct *p_arvr_data, int p_which) 
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 12, p_arvr_data->inputState.Touches & ovrTouch_RIndexPointing);
 
 		arvr_api->godot_arvr_set_controller_button(p_arvr_data->trackers[p_which], 14, p_arvr_data->inputState.Buttons & ovrButton_RThumb);
+
+		godot_real rumble = arvr_api->godot_arvr_get_controller_rumble(p_arvr_data->trackers[p_which]);
+		if (rumble != p_arvr_data->rumble[p_which]) {
+			ovr_SetControllerVibration(p_arvr_data->session, ovrControllerType_RTouch, 1.0, rumble);
+			p_arvr_data->rumble[p_which] = rumble;
+		}
 	}
 
 	if (p_arvr_data->handTriggerPressed[hand] && p_arvr_data->inputState.HandTrigger[hand] < 0.4) {
@@ -627,6 +639,7 @@ void *godot_arvr_constructor(godot_object *p_instance) {
 	arvr_data->eyeRenderTexture[1] = NULL;
 	for (int tracker = 0; tracker < MAX_TRACKERS; tracker++) {
 		arvr_data->trackers[tracker] = 0;
+		arvr_data->rumble[tracker] = 0;
 	}
 
     // Initializes LibOVR, and the Rift
